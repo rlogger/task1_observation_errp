@@ -1,0 +1,18 @@
+name: errp_env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - pillow
+  - pip
+  - pip:
+      - psychopy
+      - pylsl
+      - pyglet
+      - future
+      - requests
+      - pyobjc; sys_platform == 'darwin'
