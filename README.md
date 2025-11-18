@@ -29,4 +29,6 @@ This design is suitable for collecting behavioral logs or synchronizing with EEG
 This project runs on Python (3.8+ recommended) and requires only one dependency:
 
 ```bash
-pip install pygame
+conda env create -f environment.yaml
+conda activate errp_env
+python errp_game.py
