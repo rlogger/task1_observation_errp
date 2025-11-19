@@ -39,14 +39,83 @@ fixation = visual.TextStim(
     text="+", 
     height=0.1, 
     color=FIXATION_COLOR,
-    pos=(0, 0)  # 中心位置
+    pos=(0, 0)
 )
 
-instruction = visual.TextStim(
+# --------------------------
+# Instruction screens
+# --------------------------
+# Screen 1: Welcome
+instruction_1 = visual.TextStim(
     win,
-    text="Welcome to the ErrP Task\n\nPress SPACE to start",
-    height=0.08,
-    color=FIXATION_COLOR
+    text=(
+        "Welcome to the Error-Related Potential (ErrP) Task\n\n"
+        "In this experiment, you will observe a cursor (green square)\n"
+        "automatically moving toward a target (red square).\n\n"
+        "Press SPACE to continue"
+    ),
+    height=0.06,
+    color=FIXATION_COLOR,
+    wrapWidth=1.6
+)
+
+# Screen 2: Task explanation
+instruction_2 = visual.TextStim(
+    win,
+    text=(
+        "How it works:\n\n"
+        "• Each trial starts with a GRAY square at the center\n"
+        "• A RED target will appear somewhere on the line\n"
+        "• The square will turn GREEN and move toward the target\n"
+        "• An arrow will show the movement direction\n\n"
+        "Press SPACE to continue"
+    ),
+    height=0.06,
+    color=FIXATION_COLOR,
+    wrapWidth=1.6
+)
+
+# Screen 3: Error information
+instruction_3 = visual.TextStim(
+    win,
+    text=(
+        "IMPORTANT:\n\n"
+        "Sometimes the cursor will move in the WRONG direction!\n"
+        "This is intentional - it happens automatically.\n\n"
+        "Your task is to simply OBSERVE and pay attention\n"
+        "to when the cursor makes these errors.\n\n"
+        "Press SPACE to continue"
+    ),
+    height=0.06,
+    color=FIXATION_COLOR,
+    wrapWidth=1.6
+)
+
+# Screen 4: Visual guide with examples
+instruction_4_text = visual.TextStim(
+    win,
+    text="Visual Guide:",
+    height=0.07,
+    color=FIXATION_COLOR,
+    pos=(0, 0.35)
+)
+
+# Example visuals
+example_gray = visual.Rect(win, width=0.06, height=0.06, fillColor=CURSOR_PREP_COLOR, pos=(-0.5, 0.15))
+example_gray_label = visual.TextStim(win, text="Starting position\n(waiting)", height=0.05, color=FIXATION_COLOR, pos=(-0.5, -0.05))
+
+example_green = visual.Rect(win, width=0.06, height=0.06, fillColor=CURSOR_COLOR, pos=(0, 0.15))
+example_green_label = visual.TextStim(win, text="Active cursor\n(moving)", height=0.05, color=FIXATION_COLOR, pos=(0, -0.05))
+
+example_red = visual.Rect(win, width=0.06, height=0.06, fillColor=TARGET_COLOR, pos=(0.5, 0.15))
+example_red_label = visual.TextStim(win, text="Target\n(destination)", height=0.05, color=FIXATION_COLOR, pos=(0.5, -0.05))
+
+instruction_4_bottom = visual.TextStim(
+    win,
+    text="Press SPACE to start the experiment",
+    height=0.06,
+    color=SUCCESS_COLOR,
+    pos=(0, -0.35)
 )
 
 trial_counter = visual.TextStim(
@@ -129,17 +198,14 @@ reference_line = visual.Line(
 )
 
 # --------------------------
-# Positions array (中心点在 (0, 0))
+# Positions array
 # --------------------------
 positions = [-0.8 + i * (1.6/(N_POSITIONS-1)) for i in range(N_POSITIONS)]
-# 找到最接近 0 的位置作为起始点
 START_POSITION = min(range(len(positions)), key=lambda i: abs(positions[i]))
 
 def new_target(cursor_pos):
-    """Generate new target position away from cursor and center"""
-    # 确保 target 不在中心附近
     possible_positions = [i for i in range(N_POSITIONS) 
-                         if abs(i - cursor_pos) >= 3]  # 至少距离3个位置
+                         if abs(i - cursor_pos) >= 3]
     if possible_positions:
         return random.choice(possible_positions)
     else:
@@ -156,8 +222,33 @@ log_file = "data/logs/errp_log.csv"
 results = []
 global_clock = core.Clock()
 
-# Instruction screen
-instruction.draw()
+# --------------------------
+# Show instruction screens
+# --------------------------
+# Screen 1
+instruction_1.draw()
+win.flip()
+event.waitKeys(keyList=["space"])
+
+# Screen 2
+instruction_2.draw()
+win.flip()
+event.waitKeys(keyList=["space"])
+
+# Screen 3
+instruction_3.draw()
+win.flip()
+event.waitKeys(keyList=["space"])
+
+# Screen 4 - Visual guide
+instruction_4_text.draw()
+example_gray.draw()
+example_gray_label.draw()
+example_green.draw()
+example_green_label.draw()
+example_red.draw()
+example_red_label.draw()
+instruction_4_bottom.draw()
 win.flip()
 event.waitKeys(keyList=["space"])
 
@@ -174,21 +265,20 @@ for trial_num in range(N_TRIALS):
     # ------------------------
     # PHASE 1: PREPARATION
     # ------------------------
-    cursor_idx = START_POSITION  # 从中心开始
+    cursor_idx = START_POSITION
     target_idx = new_target(cursor_idx)
     
     cursor.fillColor = CURSOR_PREP_COLOR
-    cursor.pos = (positions[cursor_idx], 0)  # 应该在 (0, 0) 附近
+    cursor.pos = (positions[cursor_idx], 0)
     target.pos = (positions[target_idx], 0)
     target.fillColor = TARGET_COLOR
     
     trial_counter.text = f"Trial {trial_num + 1} / {N_TRIALS}"
     
-    # Prep phase - cursor 在中心，fixation 不显示（被 cursor 覆盖）
     clock = core.Clock()
     while clock.getTime() < PREP_DURATION:
         reference_line.draw()
-        cursor.draw()  # cursor 在中心，代替 fixation
+        cursor.draw()
         target.draw()
         trial_counter.draw()
         win.flip()
@@ -196,7 +286,7 @@ for trial_num in range(N_TRIALS):
     # ------------------------
     # PHASE 2: MOVEMENT
     # ------------------------
-    cursor.fillColor = CURSOR_COLOR  # 变绿，开始移动
+    cursor.fillColor = CURSOR_COLOR
     movements = 0
     
     while cursor_idx != target_idx:
@@ -217,7 +307,6 @@ for trial_num in range(N_TRIALS):
         cursor.pos = (positions[cursor_idx], 0)
         target.pos = (positions[target_idx], 0)
         
-        # Arrow
         arrow_x = positions[cursor_idx]
         arrow.pos = (arrow_x, -0.15)
         if cursor_idx > prev_cursor_idx:
@@ -227,7 +316,6 @@ for trial_num in range(N_TRIALS):
         
         clock = core.Clock()
         while clock.getTime() < MOVEMENT_DURATION:
-            # 当 cursor 离开中心后，显示 fixation
             if cursor_idx != START_POSITION:
                 fixation.draw()
             reference_line.draw()
