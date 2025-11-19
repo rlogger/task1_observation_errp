@@ -37,3 +37,5 @@ Thumbs.db
 # PsychoPy
 *.psydat
 *.psyexp~
+*.md
+README.md
