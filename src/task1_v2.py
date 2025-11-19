@@ -13,16 +13,16 @@ SUCCESS_DURATION = 1.0
 ERROR_PROB = 0.2
 
 # --------------------------
-# Colors
+# 色盲友好的配色方案
 # --------------------------
-BG_COLOR = [0.2, 0.2, 0.2]
-CURSOR_COLOR = [0.2, 0.8, 0.3]
-CURSOR_PREP_COLOR = [0.5, 0.5, 0.5]
-TARGET_COLOR = [0.9, 0.3, 0.3]
-TARGET_REACHED = [1, 1, 0.3]
-ARROW_COLOR = [0.7, 0.7, 0.7]
-FIXATION_COLOR = [0.9, 0.9, 0.9]
-SUCCESS_COLOR = [0.3, 1, 0.3]
+BG_COLOR = [0.2, 0.2, 0.2]           # 深灰背景
+CURSOR_COLOR = [0.2, 0.6, 0.9]       # 蓝色（而不是绿色）
+CURSOR_PREP_COLOR = [0.5, 0.5, 0.5]  # 灰色
+TARGET_COLOR = [0.95, 0.6, 0.1]      # 橙色（而不是红色）
+TARGET_REACHED = [1, 0.9, 0.1]       # 明亮的黄色
+ARROW_COLOR = [0.7, 0.7, 0.7]        # 浅灰色
+FIXATION_COLOR = [0.9, 0.9, 0.9]     # 白色
+SUCCESS_COLOR = [1, 0.9, 0.1]        # 黄色（和 TARGET_REACHED 一致）
 
 # --------------------------
 # Window setup
@@ -43,15 +43,14 @@ fixation = visual.TextStim(
 )
 
 # --------------------------
-# Instruction screens
+# Instruction screens (更新颜色描述)
 # --------------------------
-# Screen 1: Welcome
 instruction_1 = visual.TextStim(
     win,
     text=(
         "Welcome to the Error-Related Potential (ErrP) Task\n\n"
-        "In this experiment, you will observe a cursor (green square)\n"
-        "automatically moving toward a target (red square).\n\n"
+        "In this experiment, you will observe a cursor (blue square)\n"
+        "automatically moving toward a target (orange square).\n\n"
         "Press SPACE to continue"
     ),
     height=0.06,
@@ -59,14 +58,13 @@ instruction_1 = visual.TextStim(
     wrapWidth=1.6
 )
 
-# Screen 2: Task explanation
 instruction_2 = visual.TextStim(
     win,
     text=(
         "How it works:\n\n"
         "• Each trial starts with a GRAY square at the center\n"
-        "• A RED target will appear somewhere on the line\n"
-        "• The square will turn GREEN and move toward the target\n"
+        "• An ORANGE target will appear somewhere on the line\n"
+        "• The square will turn BLUE and move toward the target\n"
         "• An arrow will show the movement direction\n\n"
         "Press SPACE to continue"
     ),
@@ -75,7 +73,6 @@ instruction_2 = visual.TextStim(
     wrapWidth=1.6
 )
 
-# Screen 3: Error information
 instruction_3 = visual.TextStim(
     win,
     text=(
@@ -91,7 +88,6 @@ instruction_3 = visual.TextStim(
     wrapWidth=1.6
 )
 
-# Screen 4: Visual guide with examples
 instruction_4_text = visual.TextStim(
     win,
     text="Visual Guide:",
@@ -100,15 +96,15 @@ instruction_4_text = visual.TextStim(
     pos=(0, 0.35)
 )
 
-# Example visuals
+# Example visuals with new colors
 example_gray = visual.Rect(win, width=0.06, height=0.06, fillColor=CURSOR_PREP_COLOR, pos=(-0.5, 0.15))
 example_gray_label = visual.TextStim(win, text="Starting position\n(waiting)", height=0.05, color=FIXATION_COLOR, pos=(-0.5, -0.05))
 
-example_green = visual.Rect(win, width=0.06, height=0.06, fillColor=CURSOR_COLOR, pos=(0, 0.15))
-example_green_label = visual.TextStim(win, text="Active cursor\n(moving)", height=0.05, color=FIXATION_COLOR, pos=(0, -0.05))
+example_blue = visual.Rect(win, width=0.06, height=0.06, fillColor=CURSOR_COLOR, pos=(0, 0.15))
+example_blue_label = visual.TextStim(win, text="Active cursor\n(moving)", height=0.05, color=FIXATION_COLOR, pos=(0, -0.05))
 
-example_red = visual.Rect(win, width=0.06, height=0.06, fillColor=TARGET_COLOR, pos=(0.5, 0.15))
-example_red_label = visual.TextStim(win, text="Target\n(destination)", height=0.05, color=FIXATION_COLOR, pos=(0.5, -0.05))
+example_orange = visual.Rect(win, width=0.06, height=0.06, fillColor=TARGET_COLOR, pos=(0.5, 0.15))
+example_orange_label = visual.TextStim(win, text="Target\n(destination)", height=0.05, color=FIXATION_COLOR, pos=(0.5, -0.05))
 
 instruction_4_bottom = visual.TextStim(
     win,
@@ -128,10 +124,11 @@ trial_counter = visual.TextStim(
 
 success_text = visual.TextStim(
     win,
-    text="TARGET REACHED!",
-    height=0.08,
+    text="TARGET REACHED!",  # 添加符号增加视觉效果
+    height=0.1,
     color=SUCCESS_COLOR,
-    pos=(0, 0.3)
+    pos=(0, 0.3),
+    bold=True
 )
 
 # --------------------------
@@ -153,13 +150,15 @@ target = visual.Rect(
     lineColor=None
 )
 
+# 成功高光 - 更明显
 success_highlight = visual.Rect(
     win,
-    width=0.12,
-    height=0.12,
+    width=0.14,  # 更大
+    height=0.14,
     fillColor=None,
     lineColor=SUCCESS_COLOR,
-    lineWidth=4
+    lineWidth=6,  # 更粗
+    opacity=1.0  # 完全不透明
 )
 
 # --------------------------
@@ -225,29 +224,25 @@ global_clock = core.Clock()
 # --------------------------
 # Show instruction screens
 # --------------------------
-# Screen 1
 instruction_1.draw()
 win.flip()
 event.waitKeys(keyList=["space"])
 
-# Screen 2
 instruction_2.draw()
 win.flip()
 event.waitKeys(keyList=["space"])
 
-# Screen 3
 instruction_3.draw()
 win.flip()
 event.waitKeys(keyList=["space"])
 
-# Screen 4 - Visual guide
 instruction_4_text.draw()
 example_gray.draw()
 example_gray_label.draw()
-example_green.draw()
-example_green_label.draw()
-example_red.draw()
-example_red_label.draw()
+example_blue.draw()
+example_blue_label.draw()
+example_orange.draw()
+example_orange_label.draw()
 instruction_4_bottom.draw()
 win.flip()
 event.waitKeys(keyList=["space"])
@@ -337,18 +332,18 @@ for trial_num in range(N_TRIALS):
         })
     
     # ------------------------
-    # PHASE 3: SUCCESS
+    # PHASE 3: SUCCESS - 更明显的反馈
     # ------------------------
-    target.fillColor = TARGET_REACHED
+    target.fillColor = TARGET_REACHED  # 明亮的黄色
     success_highlight.pos = target.pos
     
     clock = core.Clock()
     while clock.getTime() < SUCCESS_DURATION:
         reference_line.draw()
-        success_highlight.draw()
-        target.draw()
-        cursor.draw()
-        success_text.draw()
+        success_highlight.draw()  # 黄色粗边框
+        target.draw()  # 黄色填充的目标
+        cursor.draw()  # 蓝色光标
+        success_text.draw()  # 黄色文字
         trial_counter.draw()
         win.flip()
     
