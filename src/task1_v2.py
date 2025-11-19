@@ -13,16 +13,16 @@ SUCCESS_DURATION = 1.0
 ERROR_PROB = 0.2
 
 # --------------------------
-# 色盲友好的配色方案
+# color
 # --------------------------
-BG_COLOR = [0.2, 0.2, 0.2]           # 深灰背景
-CURSOR_COLOR = [0.2, 0.6, 0.9]       # 蓝色（而不是绿色）
-CURSOR_PREP_COLOR = [0.5, 0.5, 0.5]  # 灰色
-TARGET_COLOR = [0.95, 0.6, 0.1]      # 橙色（而不是红色）
-TARGET_REACHED = [1, 0.9, 0.1]       # 明亮的黄色
-ARROW_COLOR = [0.7, 0.7, 0.7]        # 浅灰色
-FIXATION_COLOR = [0.9, 0.9, 0.9]     # 白色
-SUCCESS_COLOR = [1, 0.9, 0.1]        # 黄色（和 TARGET_REACHED 一致）
+BG_COLOR = [0.2, 0.2, 0.2]           # dark gray
+CURSOR_COLOR = [0.2, 0.6, 0.9]       # blue
+CURSOR_PREP_COLOR = [0.5, 0.5, 0.5]  # gray
+TARGET_COLOR = [0.95, 0.6, 0.1]      # orange
+TARGET_REACHED = [1, 0.9, 0.1]       # yellow
+ARROW_COLOR = [0.7, 0.7, 0.7]        # light gray
+FIXATION_COLOR = [0.9, 0.9, 0.9]     # white
+SUCCESS_COLOR = [1, 0.9, 0.1]        # yellow
 
 # --------------------------
 # Window setup
@@ -124,7 +124,7 @@ trial_counter = visual.TextStim(
 
 success_text = visual.TextStim(
     win,
-    text="TARGET REACHED!",  # 添加符号增加视觉效果
+    text="TARGET REACHED!",  
     height=0.1,
     color=SUCCESS_COLOR,
     pos=(0, 0.3),
@@ -150,15 +150,15 @@ target = visual.Rect(
     lineColor=None
 )
 
-# 成功高光 - 更明显
+# success highlight
 success_highlight = visual.Rect(
     win,
-    width=0.14,  # 更大
+    width=0.14,  
     height=0.14,
     fillColor=None,
     lineColor=SUCCESS_COLOR,
-    lineWidth=6,  # 更粗
-    opacity=1.0  # 完全不透明
+    lineWidth=6,  
+    opacity=1.0  
 )
 
 # --------------------------
@@ -332,18 +332,18 @@ for trial_num in range(N_TRIALS):
         })
     
     # ------------------------
-    # PHASE 3: SUCCESS - 更明显的反馈
+    # PHASE 3: SUCCESS 
     # ------------------------
-    target.fillColor = TARGET_REACHED  # 明亮的黄色
+    target.fillColor = TARGET_REACHED  
     success_highlight.pos = target.pos
     
     clock = core.Clock()
     while clock.getTime() < SUCCESS_DURATION:
         reference_line.draw()
-        success_highlight.draw()  # 黄色粗边框
-        target.draw()  # 黄色填充的目标
-        cursor.draw()  # 蓝色光标
-        success_text.draw()  # 黄色文字
+        success_highlight.draw()  
+        target.draw()  
+        cursor.draw()  
+        success_text.draw()  
         trial_counter.draw()
         win.flip()
     
