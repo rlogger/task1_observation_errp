@@ -1,3 +1,5 @@
+# bug: skips through the introductary instructions
+
 from psychopy import visual, core, event
 import pygame
 import os, csv, random, math
@@ -627,6 +629,7 @@ end_text = visual.TextStim(
 end_text.draw()
 win.flip()
 core.wait(3.0)
+
 
 # ------------------------
 # Save data
