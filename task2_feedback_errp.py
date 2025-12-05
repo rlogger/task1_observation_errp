@@ -29,21 +29,57 @@ CURSOR_RADIUS = 0.04
 TARGET_SIZE = 0.08
 
 # --------------------------
-# Joystick setup
+# Input method selection
+# --------------------------
+print("\nTask 2: Feedback ErrP Experiment")
+print("=" * 50)
+print("\nChoose your input method:")
+print("1. Controller/Joystick")
+print("2. Keyboard (Arrow keys)")
+print()
+
+while True:
+    choice = input("Enter your choice (1 or 2): ").strip()
+    if choice == "1":
+        USE_CONTROLLER = True
+        break
+    elif choice == "2":
+        USE_CONTROLLER = False
+        break
+    else:
+        print("Invalid choice. Please enter 1 or 2.")
+
+# --------------------------
+# Joystick setup (if using controller)
 # --------------------------
 pygame.init()
-pygame.joystick.init()
+joystick = None
 
-if pygame.joystick.get_count() == 0:
-    print("WARNING: No joystick detected!")
-    print("Please connect a gamepad/controller and restart.")
-    input("Press Enter to exit...")
-    exit()
+if USE_CONTROLLER:
+    pygame.joystick.init()
 
-joystick = pygame.joystick.Joystick(0)
-joystick.init()
-print(f"Joystick detected: {joystick.get_name()}")
-print(f"Axes: {joystick.get_numaxes()}, Buttons: {joystick.get_numbuttons()}")
+    if pygame.joystick.get_count() == 0:
+        print("\nWARNING: No joystick detected!")
+        print("Please connect a gamepad/controller and restart,")
+        print("or choose keyboard controls instead.")
+        input("Press Enter to exit...")
+        exit()
+
+    joystick = pygame.joystick.Joystick(0)
+    joystick.init()
+    print(f"\nJoystick detected: {joystick.get_name()}")
+    print(f"Axes: {joystick.get_numaxes()}, Buttons: {joystick.get_numbuttons()}")
+else:
+    print("\nKeyboard controls selected!")
+    print("Use Arrow Keys to move the cursor")
+    print("Press SPACE to start trials")
+
+# --------------------------
+# Keyboard state tracking (if using keyboard)
+# --------------------------
+# We'll use pygame's key state for smooth continuous movement
+if not USE_CONTROLLER:
+    pygame.key.set_repeat(1, 1)  # Enable key repeat for smooth movement
 
 # --------------------------
 # Window setup
@@ -112,63 +148,84 @@ instruction_text = visual.TextStim(
 # --------------------------
 # Instruction screens
 # --------------------------
-instructions = [
-    (
-        "Task 2: Feedback ErrP Experiment\n"
-        "Cursor Control with Visual Rotations\n\n"
-        "Welcome! In this experiment, you will ACTIVELY CONTROL\n"
-        "a cursor using the joystick to reach targets as quickly as possible.\n\n"
-        "Unlike Task 1 where you observed, here YOU are in control.\n\n"
-        "Press A button (or button 0) to continue"
-    ),
-    (
-        "How It Works\n\n"
-        "• Use the LEFT JOYSTICK to control a BLUE circle (cursor)\n"
-        "• Move the cursor to reach a RED square (target)\n"
-        "• Move as quickly and accurately as possible\n"
-        "• Press A button to start each trial\n\n"
-        "Press A button to continue"
-    ),
-    (
-        "⚠️  Visual Rotations\n\n"
-        "Sometimes (30% of trials), the cursor control will be ROTATED!\n\n"
-        "When you push the joystick in one direction,\n"
-        "the cursor may move in a slightly different direction.\n\n"
-        "• Rotations occur UNPREDICTABLY during movement\n"
-        "• Rotation magnitudes: 20°, 40°, or 60°\n"
-        "• You must ADAPT QUICKLY to reach the target\n\n"
-        "This is what triggers the error-related brain signals we're measuring.\n\n"
-        "Press A button to continue"
-    ),
-    (
-        "Visual Guide\n\n"
-        "BLUE CIRCLE = Cursor (you control)\n"
-        "RED SQUARE = Target (goal)\n"
-        "YELLOW = Success!\n\n"
-        "After trials with rotations, you'll be asked\n"
-        "if you perceived the rotation.\n\n"
-        "Ready to begin?\n\n"
-        "Press A button to start experiment"
-    )
-]
+def get_instructions():
+    """Generate instructions based on input method."""
+    if USE_CONTROLLER:
+        control_desc = "the joystick"
+        control_detail = "• Use the LEFT JOYSTICK to control a BLUE circle (cursor)\n"
+        start_button = "Press A button"
+        rotation_desc = "When you push the joystick in one direction,\nthe cursor may move in a slightly different direction."
+    else:
+        control_desc = "the keyboard"
+        control_detail = "• Use the ARROW KEYS to control a BLUE circle (cursor)\n"
+        start_button = "Press SPACE"
+        rotation_desc = "When you press arrow keys in one direction,\nthe cursor may move in a slightly different direction."
+
+    return [
+        (
+            "Task 2: Feedback ErrP Experiment\n"
+            "Cursor Control with Visual Rotations\n\n"
+            f"Welcome! In this experiment, you will ACTIVELY CONTROL\n"
+            f"a cursor using {control_desc} to reach targets as quickly as possible.\n\n"
+            "Unlike Task 1 where you observed, here YOU are in control.\n\n"
+            f"{start_button} to continue"
+        ),
+        (
+            "How It Works\n\n"
+            f"{control_detail}"
+            "• Move the cursor to reach a RED square (target)\n"
+            "• Move as quickly and accurately as possible\n"
+            f"• {start_button} to start each trial\n\n"
+            f"{start_button} to continue"
+        ),
+        (
+            "⚠️  Visual Rotations\n\n"
+            "Sometimes (30% of trials), the cursor control will be ROTATED!\n\n"
+            f"{rotation_desc}\n\n"
+            "• Rotations occur UNPREDICTABLY during movement\n"
+            "• Rotation magnitudes: 20°, 40°, or 60°\n"
+            "• You must ADAPT QUICKLY to reach the target\n\n"
+            "This is what triggers the error-related brain signals we're measuring.\n\n"
+            f"{start_button} to continue"
+        ),
+        (
+            "Visual Guide\n\n"
+            "BLUE CIRCLE = Cursor (you control)\n"
+            "RED SQUARE = Target (goal)\n"
+            "YELLOW = Success!\n\n"
+            "After trials with rotations, you'll be asked\n"
+            "if you perceived the rotation.\n\n"
+            "Ready to begin?\n\n"
+            f"{start_button} to start experiment"
+        )
+    ]
 
 def show_instructions():
     """Display all instruction screens."""
+    instructions = get_instructions()
     for instr in instructions:
         instruction_text.text = instr
         instruction_text.draw()
         win.flip()
-        
+
         # Wait for button press
         waiting = True
         while waiting:
-            pygame.event.pump()
-            for i in range(joystick.get_numbuttons()):
-                if joystick.get_button(i):
+            if USE_CONTROLLER:
+                pygame.event.pump()
+                for i in range(joystick.get_numbuttons()):
+                    if joystick.get_button(i):
+                        waiting = False
+                        core.wait(0.3)  # Debounce
+                        break
+            else:
+                pygame.event.pump()
+                keys_pressed = pygame.key.get_pressed()
+                if keys_pressed[pygame.K_SPACE]:
                     waiting = False
                     core.wait(0.3)  # Debounce
-                    break
-            
+
+            # Check for escape in both modes
             keys = event.getKeys(['escape'])
             if 'escape' in keys:
                 win.close()
@@ -263,44 +320,89 @@ def show_questionnaire():
 # --------------------------
 # Helper functions
 # --------------------------
+def get_keyboard_input():
+    """Get keyboard arrow key input and spacebar press."""
+    pygame.event.pump()  # Process event queue
+
+    x = 0
+    y = 0
+    button_pressed = False
+
+    # Get current state of all keys
+    keys = pygame.key.get_pressed()
+
+    # Arrow keys for movement
+    if keys[pygame.K_LEFT]:
+        x = -1.0
+    if keys[pygame.K_RIGHT]:
+        x = 1.0
+    if keys[pygame.K_UP]:
+        y = -1.0  # Matches joystick convention (up = negative)
+    if keys[pygame.K_DOWN]:
+        y = 1.0  # Matches joystick convention (down = positive)
+
+    # Check for spacebar
+    if keys[pygame.K_SPACE]:
+        button_pressed = True
+
+    return x, y, button_pressed
+
 def get_joystick_input():
     """Get joystick axis values and button press."""
     pygame.event.pump()
-    
+
     # Left stick (axes 0, 1)
     x = joystick.get_axis(0)
     y = joystick.get_axis(1)
-    
+
     # Apply deadzone
     if abs(x) < 0.15:
         x = 0
     if abs(y) < 0.15:
         y = 0
-    
+
     # Check for button press (button 0 = A on Xbox, Cross on PS)
     button_pressed = joystick.get_button(0)
-    
+
     return x, y, button_pressed
+
+def get_input():
+    """Get input from either keyboard or controller based on settings."""
+    if USE_CONTROLLER:
+        return get_joystick_input()
+    else:
+        return get_keyboard_input()
 
 def wait_for_button():
     """Wait for button press to start trial."""
-    instruction_text.text = "Press A button to start trial"
+    if USE_CONTROLLER:
+        instruction_text.text = "Press A button to start trial"
+    else:
+        instruction_text.text = "Press SPACE to start trial"
     instruction_text.pos = (0, 0)
-    
+
     waiting = True
     while waiting:
         instruction_text.draw()
         win.flip()
-        
-        pygame.event.pump()
-        if joystick.get_button(0):
-            waiting = False
-            core.wait(0.3)  # Debounce
-        
+
+        if USE_CONTROLLER:
+            pygame.event.pump()
+            if joystick.get_button(0):
+                waiting = False
+                core.wait(0.3)  # Debounce
+        else:
+            pygame.event.pump()
+            keys_pressed = pygame.key.get_pressed()
+            if keys_pressed[pygame.K_SPACE]:
+                waiting = False
+                core.wait(0.3)  # Debounce
+
+        # Check for escape in both modes
         keys = event.getKeys(['escape'])
         if 'escape' in keys:
             return False
-    
+
     return True
 
 def apply_rotation(angle_rad, rotation_angle_deg):
@@ -381,8 +483,8 @@ for trial_num in range(N_TRIALS):
     clock = core.Clock()
     
     while not reached_target:
-        # Get joystick input
-        joy_x, joy_y, button = get_joystick_input()
+        # Get input (from controller or keyboard)
+        joy_x, joy_y, button = get_input()
         
         # Check for escape
         keys = event.getKeys(['escape'])
