@@ -8,7 +8,7 @@ import os, csv, random, math
 N_TRIALS = 90  # 90 trials per session (paper used 90)
 ERROR_PROBABILITY = 0.30  # 30% error trials
 ROTATION_ANGLES = [20, 40, 60]  # Degrees (paper used these angles)
-CURSOR_SPEED = 5.0  # Normalized units per frame
+CURSOR_SPEED = 0.8  # Normalized units per second (frame-rate independent)
 MIN_DISTANCE = 0.6  # Minimum distance target must be from cursor
 BOUNDARY_MIN = 0.30  # Rotation occurs between 30-60% of distance
 BOUNDARY_MAX = 0.60
@@ -337,9 +337,9 @@ def get_keyboard_input():
     if keys[pygame.K_RIGHT]:
         x = 1.0
     if keys[pygame.K_UP]:
-        y = -1.0  # Matches joystick convention (up = negative)
+        y = 1.0  # Up = positive Y in normalized coordinates
     if keys[pygame.K_DOWN]:
-        y = 1.0  # Matches joystick convention (down = positive)
+        y = -1.0  # Down = negative Y in normalized coordinates
 
     # Check for spacebar
     if keys[pygame.K_SPACE]:
@@ -466,8 +466,9 @@ for trial_num in range(N_TRIALS):
     cursor.pos = cursor_pos
     target.pos = target_pos
     target.fillColor = TARGET_COLOR
-    
+
     # Trial state
+    cursor_start_x = cursor_pos[0]  # Store initial X for boundary crossing logic
     rotation_active = False
     rotation_onset_time = None
     trial_start_time = global_clock.getTime()
@@ -480,9 +481,12 @@ for trial_num in range(N_TRIALS):
     # Movement phase
     # ------------------------
     reached_target = False
-    clock = core.Clock()
-    
+    frame_clock = core.Clock()  # For delta time calculation
+
     while not reached_target:
+        # Calculate delta time for frame-rate independent movement
+        dt = frame_clock.getTime()
+        frame_clock.reset()
         # Get input (from controller or keyboard)
         joy_x, joy_y, button = get_input()
         
@@ -504,8 +508,13 @@ for trial_num in range(N_TRIALS):
             magnitude = min(magnitude, 1.0)
             
             # Check if crossed boundary (trigger rotation)
-            crossed_boundary = (cursor_pos[0] - boundary_x) * (target_pos[0] - boundary_x) > 0
-            
+            # If moving right (left->right), check if cursor_x >= boundary_x
+            # If moving left (right->left), check if cursor_x <= boundary_x
+            if side == 'left':  # Moving right
+                crossed_boundary = cursor_pos[0] >= boundary_x
+            else:  # Moving left
+                crossed_boundary = cursor_pos[0] <= boundary_x
+
             if is_error_trial and not rotation_active and crossed_boundary:
                 rotation_active = True
                 rotation_onset_time = global_clock.getTime()
@@ -513,9 +522,9 @@ for trial_num in range(N_TRIALS):
             # Apply rotation if active
             if rotation_active:
                 input_angle = apply_rotation(input_angle, rotation_angle)
-            
-            # Move cursor
-            speed = magnitude * CURSOR_SPEED * 0.01
+
+            # Move cursor (frame-rate independent)
+            speed = magnitude * CURSOR_SPEED * dt
             cursor_pos[0] += math.cos(input_angle) * speed
             cursor_pos[1] += math.sin(input_angle) * speed
             
