@@ -145,6 +145,3 @@ else:
 
 MIT License
 
----
-
-**Version**: 1.1 | Colorblind-friendly design
